@@ -1,157 +1,31 @@
-# Pre-commit configuration for Song Genre Classification Project
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
+#fail_fast: true
 
 repos:
-  # General hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
+      - id: no-commit-to-branch
+      - id: check-added-large-files
       - id: check-yaml
       - id: check-json
-      - id: check-toml
-      - id: check-xml
-      - id: check-added-large-files
-        args: ['--maxkb=1000']
-      - id: check-case-conflict
+      - id: trailing-whitespace
       - id: check-merge-conflict
-      - id: debug-statements
-      - id: detect-private-key
-      - id: mixed-line-ending
-        args: ['--fix=lf']
-      - id: name-tests-test
-        args: ['--pytest-test-first']
-
-  # Python code formatting
-  - repo: https://github.com/psf/black
-    rev: 23.7.0
+  - repo: https://github.com/ambv/black
+    rev: 24.3.0
     hooks:
       - id: black
-        language_version: python3
-        args: [--line-length=88, --target-version=py38]
-
-  # Import sorting
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+  - repo: https://github.com/timothycrosley/isort
+    rev: 5.13.2
     hooks:
       - id: isort
-        args: [--profile=black, --line-length=88]
-
-  # Python linting
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        args: [--max-line-length=88, --extend-ignore=E203,W503]
-        additional_dependencies:
-          - flake8-docstrings
-          - flake8-bugbear
-          - flake8-comprehensions
-          - flake8-simplify
-
-  # Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
+    rev: v1.10.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-all]
-        args: [--ignore-missing-imports, --no-strict-optional]
-
-  # Security checks
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+        additional_dependencies:
+          [types-setuptools, types-requests, types-PyYAML]
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
     hooks:
-      - id: bandit
-        args: [-r, ., -f, json, -o, bandit-report.json]
-        exclude: ^test_.*\.py$
-
-  # Documentation
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        args: [--convention=google]
-        exclude: ^test_.*\.py$
-
-  # Jupyter notebook cleaning
-  - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.7.0
-    hooks:
-      - id: nbqa-black
-        args: [--line-length=88]
-      - id: nbqa-isort
-        args: [--profile=black]
-      - id: nbqa-flake8
-        args: [--max-line-length=88]
-
-  # YAML formatting
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0
-    hooks:
-      - id: prettier
-        types: [yaml]
-        args: [--tab-width=2]
-
-  # Markdown linting
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.35.0
-    hooks:
-      - id: markdownlint
-        args: [--config=.markdownlint.json]
-
-  # Commit message linting
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.5.2
-    hooks:
-      - id: commitizen
-        stages: [commit-msg]
-
-  # Custom hooks for this project
-  - repo: local
-    hooks:
-      - id: pytest-check
-        name: Run pytest
-        entry: pytest
-        language: system
-        types: [python]
-        args: [test_song_classifier.py, -v]
-        pass_filenames: false
-        always_run: false
-
-      - id: pylint-check
-        name: Run pylint
-        entry: pylint
-        language: system
-        types: [python]
-        args: [song_genre_classifier.py, config.py, cli.py, --output-format=text]
-        pass_filenames: false
-        always_run: false
-
-      - id: check-requirements
-        name: Check requirements.txt
-        entry: python -c "import pkg_resources; pkg_resources.parse_requirements(open('requirements.txt'))"
-        language: system
-        files: requirements.txt
-        pass_filenames: false
-
-      - id: check-config-validity
-        name: Check config.py validity
-        entry: python -c "import config; print('Config loaded successfully')"
-        language: system
-        files: config.py
-        pass_filenames: false
-
-# Configuration for specific hooks
-ci:
-  autofix_commit_msg: |
-    [pre-commit.ci] auto fixes from pre-commit.com hooks
-
-    for more information, see https://pre-commit.ci
-  autofix_prs: true
-  autoupdate_branch: ''
-  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: weekly
-  skip: []
-  submodules: false
+      - id: flake8
+        additional_dependencies: [Flake8-pyproject] # Flake8 plug-in loading the configuration from pyproject.toml

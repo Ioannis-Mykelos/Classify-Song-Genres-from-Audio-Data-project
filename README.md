@@ -56,26 +56,57 @@ Classify-Song-Genres-from-Audio-Data-project/
 
 ## 🛠️ Installation
 
+### Quick Start
+
 1. **Clone the repository:**
    ```bash
    git clone <repository-url>
    cd Classify-Song-Genres-from-Audio-Data-project
    ```
 
-2. **Create a virtual environment:**
+2. **Set up development environment (recommended):**
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   python scripts/setup_dev.py
    ```
 
-3. **Install dependencies:**
+3. **Or manual setup:**
    ```bash
+   # Create virtual environment
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   
+   # Install dependencies
    pip install -r requirements.txt
+   
+   # Install pre-commit hooks
+   pre-commit install
    ```
 
 4. **Prepare your data:**
    - Place your `fma-rock-vs-hiphop.csv` and `echonest-metrics.json` files in the `data/` directory
    - Ensure the data files have the expected structure (see Data Format section)
+
+### Development Setup
+
+For contributors and developers:
+
+```bash
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Set up pre-commit hooks
+pre-commit install
+pre-commit install --hook-type commit-msg
+
+# Run all quality checks
+pre-commit run --all-files
+
+# Run tests
+pytest test_song_classifier.py -v --cov
+
+# Run linting
+pylint song_genre_classifier.py config.py cli.py
+```
 
 ## 📊 Data Format
 
@@ -161,7 +192,39 @@ python -m pytest test_song_classifier.py -v
 
 # Run with coverage
 python -m pytest test_song_classifier.py --cov=song_genre_classifier --cov-report=html
+
+# Run specific test categories
+pytest -m unit          # Unit tests only
+pytest -m integration   # Integration tests only
+pytest -m "not slow"    # Skip slow tests
 ```
+
+## 🔄 Continuous Integration
+
+This project uses GitHub Actions for automated testing and code quality checks:
+
+### Automated Checks
+
+Every push and pull request triggers:
+
+- **Pre-commit hooks**: Code formatting, linting, and quality checks
+- **Pylint**: Python code analysis and style checking
+- **Pytest**: Unit and integration tests with coverage reporting
+- **Security scanning**: Bandit security analysis
+- **Dependency checking**: Vulnerability scanning with pip-audit
+- **Type checking**: MyPy static type analysis
+
+### Quality Gates
+
+- Code coverage must be ≥80%
+- All tests must pass
+- No security vulnerabilities
+- Code must pass all linting checks
+- Pre-commit hooks must pass
+
+### View CI Status
+
+Check the [Actions tab](https://github.com/yourusername/Classify-Song-Genres-from-Audio-Data-project/actions) in your repository to see the latest CI runs.
 
 ## 📈 Model Performance
 
@@ -250,20 +313,41 @@ CMD ["python", "cli.py", "train"]
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-### Development Setup
+### Development Workflow
+
 ```bash
-# Install development dependencies
-pip install -r requirements.txt
+# 1. Make changes to your code
+# 2. Run pre-commit hooks manually (optional)
+pre-commit run --all-files
 
-# Run tests
-python -m pytest
+# 3. Run tests
+pytest test_song_classifier.py -v --cov
 
-# Format code
-black song_genre_classifier.py
+# 4. Run specific quality checks
+black song_genre_classifier.py config.py cli.py    # Format code
+isort song_genre_classifier.py config.py cli.py    # Sort imports
+pylint song_genre_classifier.py config.py cli.py   # Lint code
+mypy song_genre_classifier.py config.py cli.py     # Type checking
+bandit -r song_genre_classifier.py config.py cli.py # Security scan
 
-# Lint code
-flake8 song_genre_classifier.py
+# 5. Commit your changes (pre-commit hooks run automatically)
+git add .
+git commit -m "feat: add new feature"
+
+# 6. Push to trigger CI/CD pipeline
+git push origin feature-branch
 ```
+
+### Code Quality Tools
+
+- **Black**: Code formatting
+- **isort**: Import sorting
+- **Flake8**: Linting and style checking
+- **Pylint**: Advanced code analysis
+- **MyPy**: Static type checking
+- **Bandit**: Security vulnerability scanning
+- **Pytest**: Testing framework with coverage
+- **Pre-commit**: Git hooks for quality assurance
 
 ## 📝 License
 

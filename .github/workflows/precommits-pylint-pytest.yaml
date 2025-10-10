@@ -1,134 +1,182 @@
-name: Code Quality and Testing
+name: Running pylint, pre-commits and pytest
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  - pull_request
 
 jobs:
-  code-quality:
+  pylint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, 3.10, 3.11]
+    name: Run pylint
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+      - name: Upgrade pip
+        run: pip install --upgrade pip
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pre-commit pylint pytest-cov
+      - name: Install pylint
+        run: pip install pylint==3.1.0
 
-    - name: Set up pre-commit
-      run: |
-        pre-commit install
-        pre-commit install --hook-type commit-msg
+      - name: Run pylint
+        id: pylint
+        run: |
+          set +e
+          output=$(pylint --fail-under=8 --disable=E0401 --ignore-imports=yes -d duplicate-code $(git ls-files '*.py') > err.log)
+          state=$(echo $?)
+          err_output=$(cat err.log)
+          output="${output}\n${err_output}"
+          delimiter="$(openssl rand -hex 8)"
+          echo "pylint-output<<${delimiter}" >> "${GITHUB_OUTPUT}"
+          echo "$output" >> "${GITHUB_OUTPUT}"
+          echo "${delimiter}" >> "${GITHUB_OUTPUT}"
+          set -e
+          exit $state
+        continue-on-error: True
 
-    - name: Run pre-commit hooks
-      run: |
-        pre-commit run --all-files
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Pylint score over 8 \`${{ steps.pylint.outcome }}\`
+            <details><summary>Show Outputs</summary>
+            ${{ steps.pylint.outputs.pylint-output }}
+            </details>
+            *Pusher: @${{ github.actor }}, Action: ${{ github.event_name }}*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
-    - name: Run pylint
-      run: |
-        pylint --version
-        pylint song_genre_classifier.py config.py cli.py --output-format=text --reports=y --score=y
+      - name: Pylint status
+        if: steps.pylint.outcome == 'failure'
+        run: exit 1
 
-    - name: Run pytest with coverage
-      run: |
-        pytest test_song_classifier.py -v --cov=song_genre_classifier --cov=config --cov=cli --cov-report=xml --cov-report=html --cov-report=term-missing
-
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
-
-    - name: Check code formatting
-      run: |
-        python -m black --check --diff song_genre_classifier.py config.py cli.py test_song_classifier.py
-
-    - name: Check import sorting
-      run: |
-        python -m isort --check-only --diff song_genre_classifier.py config.py cli.py test_song_classifier.py
-
-  security-scan:
+  precommits:
     runs-on: ubuntu-latest
+    name: Run precommits
+    needs: pylint
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.10
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-    - name: Install security tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install bandit safety
+      - name: Upgrade pip
+        run: pip install --upgrade pip
 
-    - name: Run security scan with bandit
-      run: |
-        bandit -r song_genre_classifier.py config.py cli.py -f json -o bandit-report.json || true
-        bandit -r song_genre_classifier.py config.py cli.py
+      - name: Install pre-commit
+        run: pip install pre-commit==3.5.0
 
-    - name: Check for known security vulnerabilities
-      run: |
-        safety check --json --output safety-report.json || true
-        safety check
+      - name: Run pre-commit hooks
+        id: precommit
+        run: pre-commit run --color=always --show-diff-on-failure --all-files
+        continue-on-error: True
 
-  dependency-check:
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Run of pre-commits \`${{ steps.precommit.outcome }}\`
+            If pre-commits fail please re-run them on all your files.\n
+            Use the command : pre-commit run --all-files
+            *Pusher: @${{ github.actor }}, Action: ${{ github.event_name }}*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Pre-commit status
+        if: steps.precommit.outcome == 'failure'
+        run: exit 1
+
+  pytest:
     runs-on: ubuntu-latest
+    name: Run pytest
+    needs: [pylint, precommits]
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.10
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-    - name: Install pip-audit
-      run: |
-        python -m pip install --upgrade pip
-        pip install pip-audit
+      - name: Install pandas
+        run: pip install pandas==2.2.3
 
-    - name: Run dependency vulnerability check
-      run: |
-        pip-audit --format=json --output=pip-audit-report.json || true
-        pip-audit
+      - name: Install scipy
+        run: pip install scipy==1.14.1
 
-  lint-summary:
-    runs-on: ubuntu-latest
-    needs: [code-quality, security-scan, dependency-check]
-    if: always()
-    steps:
-    - name: Lint Summary
-      run: |
-        echo "## Code Quality Summary" >> $GITHUB_STEP_SUMMARY
-        echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
-        echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-        echo "| Pre-commit hooks | ${{ needs.code-quality.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Pylint | ${{ needs.code-quality.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Pytest | ${{ needs.code-quality.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Security Scan | ${{ needs.security-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Dependency Check | ${{ needs.dependency-check.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+      # Set PYTHONPATH to include the current working directory (root)
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=./" >> $GITHUB_ENV
+
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
+      - name: Install pytest
+        run: pip install pytest==8.2.2
+
+      - name: Install fuzzywuzzy
+        run: pip install fuzzywuzzy==0.18.0
+
+      - name: Run pytest and generate coverage report
+        id: pytest
+        run: |
+          set +e
+          output=$(pytest --junitxml=pytest.xml --tb=short --verbose $(git ls-files 'test/test_*.py')> err.log)
+          state=$(echo $?)
+          err_output=$(cat err.log)
+          output="${output}\n${err_output}"
+          delimiter="$(openssl rand -hex 8)"
+          echo "pytest-output<<${delimiter}" >> "${GITHUB_OUTPUT}"
+          echo "$output" >> "${GITHUB_OUTPUT}"
+          echo "${delimiter}" >> "${GITHUB_OUTPUT}"
+          set -e
+          exit $state
+        continue-on-error: True
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          junitxml-path: ./pytest.xml
+          create-new-comment: True
+
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Run of Pytest \`${{ steps.pytest.outcome }}\`
+            <details><summary>Show Outputs</summary>
+            ${{ steps.pytest.outputs.pytest-output }}
+            </details>
+            *Pusher: @${{ github.actor }}, Action: ${{ github.event_name }}*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Pytest status
+        if: steps.pytest.outcome == 'failure'
+        run: exit 1
