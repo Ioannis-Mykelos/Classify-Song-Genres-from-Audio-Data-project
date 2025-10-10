@@ -1,0 +1,18 @@
+[project]
+name = "classify-song-genres-from-audio-data-project"
+version = "0.1.0"
+description = "XGBoost classifier environment"
+authors = [
+    {name = "ioki",email = "qmichel05@hotmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "xgboost (>=3.0.5,<4.0.0)",
+    "pandas (>=2.3.3,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
