@@ -134,7 +134,9 @@ class TestSongGenreClassifier:
         # Should not raise any exceptions
         classifier.plot_confusion_matrices(results)
 
-    def test_save_models(self, mock_matplotlib, classifier, sample_data, temp_model_dir):
+    def test_save_models(
+        self, mock_matplotlib, classifier, sample_data, temp_model_dir
+    ):
         """Test model saving."""
         scaled_features, labels = classifier.preprocess_data(sample_data)
         pca_features = classifier.perform_pca(scaled_features, n_components=3)
@@ -147,7 +149,9 @@ class TestSongGenreClassifier:
         assert (temp_model_dir / "scaler.pkl").exists()
         assert (temp_model_dir / "pca.pkl").exists()
 
-    def test_load_models(self, mock_matplotlib, classifier, sample_data, temp_model_dir):
+    def test_load_models(
+        self, mock_matplotlib, classifier, sample_data, temp_model_dir
+    ):
         """Test model loading."""
         scaled_features, labels = classifier.preprocess_data(sample_data)
         pca_features = classifier.perform_pca(scaled_features, n_components=3)
@@ -206,35 +210,41 @@ class TestSongGenreClassifier:
 
     def test_validate_data_missing_columns(self, classifier):
         """Test data validation with missing required columns."""
-        invalid_data = pd.DataFrame({
-            "track_id": [1, 2, 3],
-            "danceability": [0.5, 0.8, 0.3],
-        })
-        
+        invalid_data = pd.DataFrame(
+            {
+                "track_id": [1, 2, 3],
+                "danceability": [0.5, 0.8, 0.3],
+            }
+        )
+
         with pytest.raises(ValueError, match="Missing required columns"):
             classifier.validate_data(invalid_data)
 
     def test_validate_data_empty_dataset(self, classifier):
         """Test data validation with empty dataset."""
         empty_data = pd.DataFrame()
-        
+
         with pytest.raises(ValueError, match="Dataset is empty"):
             classifier.validate_data(empty_data)
 
-    def test_predict_with_different_models(self, mock_matplotlib, classifier, sample_data):
+    def test_predict_with_different_models(
+        self, mock_matplotlib, classifier, sample_data
+    ):
         """Test prediction with different model types."""
         scaled_features, labels = classifier.preprocess_data(sample_data)
         pca_features = classifier.perform_pca(scaled_features, n_components=3)
         classifier.train_models(pca_features, labels)
 
         test_features = np.random.randn(1, 3)
-        
+
         # Test with decision tree
         tree_predictions = classifier.predict(test_features, model_name="decision_tree")
         assert isinstance(tree_predictions, np.ndarray)
-        
+
         # Test with logistic regression
-        logreg_predictions = classifier.predict(test_features, model_name="logistic_regression")
+        logreg_predictions = classifier.predict(
+            test_features, model_name="logistic_regression"
+        )
         assert isinstance(logreg_predictions, np.ndarray)
 
 

@@ -82,7 +82,7 @@ def large_sample_data():
     """Create a larger sample dataset for more comprehensive testing."""
     np.random.seed(42)
     n_samples = 100
-    
+
     return pd.DataFrame(
         {
             "track_id": range(1, n_samples + 1),
