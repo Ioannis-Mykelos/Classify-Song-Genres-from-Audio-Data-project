@@ -138,6 +138,9 @@ jobs:
       - name: Install fuzzywuzzy
         run: pip install fuzzywuzzy==0.18.0
 
+      - name: Install joblib
+        run: pip install joblib==1.5.2
+
       - name: Run pytest and generate coverage report
         id: pytest
         run: |
