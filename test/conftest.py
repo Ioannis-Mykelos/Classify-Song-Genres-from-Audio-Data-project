@@ -14,7 +14,6 @@ import pandas as pd
 import pytest
 
 from config import get_config
-from song_genre_classifier import SongGenreClassifier
 
 
 @pytest.fixture(scope="session")
@@ -55,12 +54,6 @@ def temp_data_dir():
 
     # Cleanup
     shutil.rmtree(temp_dir)
-
-
-@pytest.fixture
-def classifier(temp_data_dir):
-    """Create a SongGenreClassifier instance with test data."""
-    return SongGenreClassifier(data_dir=str(temp_data_dir))
 
 
 @pytest.fixture
