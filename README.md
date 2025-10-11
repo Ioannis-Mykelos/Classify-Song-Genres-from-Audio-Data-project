@@ -74,10 +74,10 @@ Classify-Song-Genres-from-Audio-Data-project/
    # Create virtual environment
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   
+
    # Install dependencies
    pip install -r requirements.txt
-   
+
    # Install pre-commit hooks
    pre-commit install
    ```
