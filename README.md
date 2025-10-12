@@ -46,22 +46,22 @@ Classify-Song-Genres-from-Audio-Data-project/
 │   ├── fma-rock-vs-hiphop.csv
 │   └── echonest-metrics.json
 ├── src/                               # Source code directory
+│   ├── __init__.py
 │   ├── data_processing/
 |   │   ├── data_processing.py
 |   │   └── features.py
 │   └── models/
 |       └── models.py
 ├── test/                               # Pytest directory
+│   ├── __init__.py
 │   ├── confest.py
 │   └── test_song_classifier.py
 ├── .gitignore                          # GitHub ignore files
-├── song_genre_classifier.py    # Main classifier class
-├── cli.py                      # Command-line interface
-├── test_song_classifier.py     # Unit tests
-├── requirements.txt            # Python dependencies
-├── README.md                   # Description of the project
-├── README_PROJECT_SUMMARY.md   # ThisSummary of the project
-└── outputs/                    # Generated plots and results
+├── .pre-commit-config.yaml             # Precommit config file
+├── poetry.lock                         # Poetry lock file
+├── pyproject.toml                      # pyproject.toml file
+├── README.md                           # Description of the project
+└── README_PROJECT_SUMMARY.md           # Summary of the project
 ```
 
 ## 🛠️ Installation
