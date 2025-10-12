@@ -54,13 +54,4 @@ Thumbs.db
 *.docx
 *.xgb
 *.xlsx
-
-# Config files #
-################
-config.json
-
-# Azure Machine Learning Studio auto generated files #
-################
-.amlignore
-.amlignore.amltmp
-mlruns
+*.json
