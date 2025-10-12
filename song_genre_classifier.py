@@ -5,8 +5,8 @@ Song Genre Classification System
 A machine learning system for classifying songs into Rock and Hip-Hop genres
 using audio features from The Echo Nest dataset.
 
-Author: [Your Name]
-Date: 2024
+Author: Ioannis
+Date: 2025
 License: MIT
 """
 
