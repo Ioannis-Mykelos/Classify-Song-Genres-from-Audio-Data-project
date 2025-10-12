@@ -40,17 +40,27 @@ This project implements a complete machine learning pipeline for music genre cla
 
 ```
 Classify-Song-Genres-from-Audio-Data-project/
+├── .github/                            # GitHub Actions
+│   └── precommits-pylint-pytest.yaml
+├── data/                               # Data directory
+│   ├── fma-rock-vs-hiphop.csv
+│   └── echonest-metrics.json
+├── src/                               # Source code directory
+│   ├── data_processing/
+|   │   ├── data_processing.py
+|   │   └── features.py
+│   └── models/
+|       └── models.py
+├── test/                               # Pytest directory
+│   ├── confest.py
+│   └── test_song_classifier.py
+├── .gitignore                          # GitHub ignore files
 ├── song_genre_classifier.py    # Main classifier class
-├── config.py                   # Configuration management
 ├── cli.py                      # Command-line interface
 ├── test_song_classifier.py     # Unit tests
 ├── requirements.txt            # Python dependencies
-├── README.md                   # This file
-├── data/                       # Data directory
-│   ├── fma-rock-vs-hiphop.csv
-│   └── echonest-metrics.json
-├── models/                     # Saved models (created after training)
-├── logs/                       # Log files
+├── README.md                   # Description of the project
+├── README_PROJECT_SUMMARY.md   # ThisSummary of the project
 └── outputs/                    # Generated plots and results
 ```
 
