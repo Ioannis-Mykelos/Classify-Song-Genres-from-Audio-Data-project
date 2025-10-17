@@ -13,6 +13,13 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import sys
+
+# Ensure repository root is on sys.path for CI environments
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from config import get_config
 
 
