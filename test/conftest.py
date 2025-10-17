@@ -5,6 +5,7 @@ This module contains common fixtures that can be used across all test modules
 in the test directory.
 """
 
+import os
 import shutil
 import sys
 import tempfile
@@ -14,18 +15,15 @@ import numpy as np
 import pandas as pd
 import pytest
 
-# Ensure repository root is on sys.path for CI environments
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-from config import get_config  # noqa: E402
-
 
 @pytest.fixture(scope="session")
 def config():
-    """Get the application configuration."""
-    return get_config()
+    """Get a minimal application configuration for tests."""
+    root = Path(__file__).resolve().parents[1]
+    return {
+        "environment": os.getenv("ENV", "test"),
+        "data_dir": str(root / "data"),
+    }
 
 
 @pytest.fixture
