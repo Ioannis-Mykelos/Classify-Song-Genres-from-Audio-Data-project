@@ -6,14 +6,13 @@ in the test directory.
 """
 
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
-
-import sys
 
 # Ensure repository root is on sys.path for CI environments
 ROOT = Path(__file__).resolve().parents[1]
