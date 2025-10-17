@@ -2,15 +2,16 @@
 dataframe preprocessing file
 """
 
+from typing import Any, List, Tuple, Union
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
-from typing import Any, List, Tuple, Union
-from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
-def scale_features(dataframe: pd.DataFrame)->pd.DataFrame:
+
+def scale_features(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     This function is scaling the features dataframe
     Arguments:
@@ -25,4 +26,3 @@ def scale_features(dataframe: pd.DataFrame)->pd.DataFrame:
     scaler = StandardScaler()
     scaled_train_features = scaler.fit_transform(dataframe)
     return scaled_train_features
-    
